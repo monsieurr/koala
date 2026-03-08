@@ -1,6 +1,6 @@
-# EU AI Act Compliance Tool
+# 🐨 Koala - EU AI Act Compliance Tool
 
-An open source, self-hostable AI-powered compliance tool for EU legal documents.
+Koala 🐨 is an open source, self-hostable AI-powered compliance tool for EU legal documents.
 Ask natural language questions and receive grounded, cited answers pointing to
 specific articles, recitals, and annexes.
 
