@@ -1115,20 +1115,24 @@ def _render_right_panel():
             st.markdown("| RAM | Model |\n|-----|-------|\n| 8 GB | `mistral` |\n| 16 GB | `llama3.2` |\n| 24 GB+ | `qwen2.5:14b` |")
     else:
         api_key = st.text_input("API key", type="password",
-                                placeholder="sk-…  or  sk-ant-…",
+                                placeholder="sk-…  /  sk-ant-…  /  AIza…",
                                 value=st.session_state.api_key,
                                 key="rp_api_key")
         if api_key.startswith("sk-ant-"):
             detected_model, detected_provider = "anthropic/claude-sonnet-4-6", "Anthropic"
         elif api_key.startswith("sk-"):
             detected_model, detected_provider = "openai/gpt-4o-mini", "OpenAI"
+        elif api_key.startswith("AIza"):
+            # Google AI Studio keys — route to Gemini via LiteLLM
+            detected_model, detected_provider = "gemini/gemini-1.5-flash", "Google"
         elif api_key.strip():
             detected_model, detected_provider = "mistral/mistral-large-latest", "Mistral"
         else:
-            local = ["ollama/mistral","ollama/llama3.2","ollama/llama3.2:3b",
-                     "ollama/llama3.1","ollama/llama3.1:8b",
-                     "ollama/gemma3:9b","ollama/qwen2.5:14b","ollama/qwen2.5:7b","ollama/phi4"]
-            detected_model = st.session_state.model if st.session_state.model not in local else None
+            # No key entered yet. Keep the current model only if it is already an
+            # API-backed model; otherwise fall back to a safe API default so the
+            # app never tries to reach Ollama when the user has selected API mode.
+            current = st.session_state.model
+            detected_model = current if not current.startswith("ollama/") else "openai/gpt-4o-mini"
             detected_provider = None
         if api_key != st.session_state.api_key:
             st.session_state.model_status = "standby"
@@ -1666,8 +1670,11 @@ def _render_help():
             f'<b>Model backend:</b><br>'
             f'• <b>Local</b> — requires <a href="https://ollama.ai" style="color:var(--t2)">Ollama</a> running on your machine '
             f'(<code style="font-size:11px">ollama serve</code>). No API key needed, fully private.<br>'
-            f'• <b>API</b> — paste an OpenAI, Anthropic, or Mistral key. '
-            f'The provider is auto-detected from the key prefix.<br><br>'
+            f'• <b>API</b> — paste an API key; the provider is auto-detected from the key prefix:<br>'
+            f'&nbsp;&nbsp;&nbsp;– <code style="font-size:11px">sk-ant-…</code> → Anthropic (Claude)<br>'
+            f'&nbsp;&nbsp;&nbsp;– <code style="font-size:11px">sk-…</code> → OpenAI (GPT-4o-mini)<br>'
+            f'&nbsp;&nbsp;&nbsp;– <code style="font-size:11px">AIza…</code> → Google AI Studio (Gemini)<br>'
+            f'&nbsp;&nbsp;&nbsp;– anything else → Mistral<br><br>'
             f'<b>Filters:</b><br>'
             f'Narrow retrieval to a specific source document or language using the dropdowns. '
             f'Useful when you have ingested multiple language versions of the Act.'
