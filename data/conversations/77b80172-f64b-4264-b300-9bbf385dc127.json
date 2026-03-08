@@ -1,0 +1,15 @@
+{
+  "id": "77b80172-f64b-4264-b300-9bbf385dc127",
+  "title": "TEST",
+  "created_at": "2026-03-08T11:54:05.270478",
+  "messages": [
+    {
+      "role": "user",
+      "content": "TEST"
+    },
+    {
+      "role": "assistant",
+      "content": "No documents have been ingested. Run the ingestion pipeline first."
+    }
+  ]
+}

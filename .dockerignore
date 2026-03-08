@@ -1,0 +1,14 @@
+data/chroma/
+data/pdfs/
+*.pdf
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+.cache/
+models/
+.git/
+.gitignore
+*.md

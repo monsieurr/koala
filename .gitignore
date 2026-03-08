@@ -1,0 +1,29 @@
+# Data
+data/chroma/
+data/pdfs/
+*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Env
+.env
+
+# Models (sentence-transformers cache)
+.cache/
+models/
+
+# Streamlit
+.streamlit/
+
+# IDE
+.idea/
+.vscode/
+*.swp

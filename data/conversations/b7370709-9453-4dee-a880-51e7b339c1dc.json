@@ -1,0 +1,15 @@
+{
+  "id": "b7370709-9453-4dee-a880-51e7b339c1dc",
+  "title": "What are the conformity assessment requiremen…",
+  "created_at": "2026-03-08T11:54:18.839746",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What are the conformity assessment requirements?"
+    },
+    {
+      "role": "assistant",
+      "content": "No documents have been ingested. Run the ingestion pipeline first."
+    }
+  ]
+}

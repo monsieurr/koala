@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+  # ── Compliance Tool ────────────────────────────────────────────────────────
+  app:
+    build: .
+    container_name: ai-act-compliance
+    ports:
+      - "8501:8501"
+    volumes:
+      # Persist ChromaDB and uploaded PDFs across restarts
+      - ./data/chroma:/app/data/chroma
+      - ./data/pdfs:/app/data/pdfs
+    environment:
+      # API keys — set in .env or override here
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY:-}
+      # Point LiteLLM at the Ollama container
+      - OLLAMA_API_BASE=http://ollama:11434
+    depends_on:
+      ollama:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ── Ollama (local LLM server) ──────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      # Persist downloaded models across restarts
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+    # GPU support — uncomment if you have NVIDIA GPU + nvidia-container-toolkit
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # ── Model pull (one-shot helper) ──────────────────────────────────────────
+  # Pulls the default model on first run. Remove or change as needed.
+  ollama-pull:
+    image: ollama/ollama:latest
+    depends_on:
+      - ollama
+    entrypoint: >
+      sh -c "
+        echo 'Waiting for Ollama to be ready...' &&
+        until ollama list > /dev/null 2>&1; do sleep 2; done &&
+        echo 'Ollama ready. Pulling model...' &&
+        ollama pull mistral &&
+        echo 'Model pull complete'
+      "
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    profiles:
+      # Only runs when explicitly requested: docker compose --profile setup up
+      - setup
+    restart: "no"
+
+volumes:
+  ollama_models:

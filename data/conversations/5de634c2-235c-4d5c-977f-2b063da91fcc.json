@@ -1,0 +1,15 @@
+{
+  "id": "5de634c2-235c-4d5c-977f-2b063da91fcc",
+  "title": "What transparency obligations apply to high-r…",
+  "created_at": "2026-03-08T11:57:28.797609",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What transparency obligations apply to high-risk AI systems?"
+    },
+    {
+      "role": "assistant",
+      "content": "No documents have been ingested. Run the ingestion pipeline first."
+    }
+  ]
+}

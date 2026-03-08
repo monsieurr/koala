@@ -1,0 +1,23 @@
+# ── Core ──────────────────────────────────────────────────────────────────
+pydantic>=2.0
+
+# ── Ingestion — Layer 1 ────────────────────────────────────────────────────
+PyMuPDF>=1.27.1                  # PDF parsing (import pymupdf; 'import fitz' still works as alias)
+sentence-transformers>=5.2.3     # Local embeddings + cross-encoder reranker (v5 inference API unchanged)
+chromadb>=1.5.2                  # Persistent vector store (v1.0 rewrote in Rust; v1.5.2 is current)
+
+# ── Retrieval — Layer 2 ────────────────────────────────────────────────────
+rank-bm25>=0.2.2                 # Pure Python BM25 index
+
+# ── Generation — Layer 3 ──────────────────────────────────────────────────
+litellm>=1.63.0                  # Unified LLM interface (Ollama + API providers); latest Mar 2026
+
+# ── UI — Layer 4 ──────────────────────────────────────────────────────────
+streamlit>=1.55.0
+
+# ── Optional: local model support ─────────────────────────────────────────
+# Ollama runs as a separate process — install from https://ollama.ai
+# No Python package needed for Ollama itself; LiteLLM handles the API calls.
+
+# ── Optional: environment variable loading ─────────────────────────────────
+python-dotenv>=1.0.0
