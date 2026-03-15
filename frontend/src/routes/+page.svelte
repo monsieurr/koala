@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>Koala — AI Act Governance Assistant</title>
+  <title>Koala : AI Act Governance Assistant</title>
   <meta
     name="description"
     content="Koala is for compliance teams who need fast, citable answers under the EU AI Act. It turns your AI system inventory into obligations you can defend."

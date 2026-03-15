@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>Koala Demo — Full Workflow</title>
+  <title>Koala Demo : Full Workflow</title>
   <meta
     name="description"
     content="Full-page Koala demo with Chat, Catalog, KPIs, AI Setup, and Help. Scripted responses show the EU AI Act workflow without a backend."
