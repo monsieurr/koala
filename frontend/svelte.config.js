@@ -1,8 +1,9 @@
-import adapter from '@sveltejs/adapter-node';
+import adapterNode from '@sveltejs/adapter-node';
+import adapterVercel from '@sveltejs/adapter-vercel';
 
 const config = {
   kit: {
-    adapter: adapter()
+    adapter: process.env.VERCEL ? adapterVercel() : adapterNode()
   }
 };
 
