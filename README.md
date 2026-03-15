@@ -1,37 +1,26 @@
-# Koala — AI Governance Assistant
+# Koala — AI Act Governance Assistant
 
-Open-source, self-hostable AI governance assistant for teams that build AI. Ask grounded questions about the EU AI Act,
-track your AI portfolio, and compare the AI Act with the Digital Omnibus on AI proposal.
+Koala is an open-source, self-hostable assistant for compliance teams who need defensible answers under the EU AI Act.
+It starts with your AI system catalog and ends with citations you can paste into governance notes. The Digital Omnibus
+proposal is treated as an amendment to the AI Act, not a separate regime.
 
-Current implementation status:
+## What it does today
 
-- Layer 1: ingestion and ChromaDB persistence
-- Layer 2: hybrid retrieval with BM25, dense search, RRF fusion, reranking, and HyPE hooks
-- Layer 3: grounded answer generation with a LiteLLM wrapper and extractive fallback
-- Layer 4: FastAPI backend with query, ingest, health, source, and config endpoints
-- Layer 5: SvelteKit frontend with chat, model controls, citations, and source filters
-- Layer 5.1: Regime-aware source presets (AI Act vs Digital Omnibus on AI proposal)
-- Layer 6: Dockerfiles, compose stack, and env-driven configuration
+- Ingests AI Act sources (including the Omnibus proposal) into a searchable index.
+- Answers questions with citations and falls back to extractive responses when models are unavailable.
+- Stores AI system entries and produces role-aware risk and obligation summaries.
 
 ## What is included
+
+This is a practical stack, not a research prototype. The goal is explainable, citable answers:
 
 - PDF parsing into recital, article, and annex chunks
 - Language detection for `en`, `de`, `fr`, `it`, and `es`
 - Local embeddings via `sentence-transformers`
 - Persistent vector storage via ChromaDB
 - Sparse BM25 index built from stored chunks
-- Hybrid retriever with:
-  - BM25 top-k
-  - dense top-k
-  - reciprocal rank fusion
-  - optional cross-encoder reranking
-  - lightweight confidence scoring
-  - HyPE hypothetical-question enrichment support
-- Grounded answer generation with:
-  - LiteLLM-based provider abstraction
-  - Ollama, OpenAI, Anthropic, Mistral, and OpenAI-compatible settings
-  - citation-aware prompt construction
-  - extractive fallback when model generation is unavailable
+- Hybrid retriever (BM25 + dense + RRF + optional reranking + confidence scoring)
+- Answer generation with LiteLLM and an extractive fallback
 - FastAPI API with:
   - `POST /query`
   - `POST /ingest`
@@ -39,12 +28,7 @@ Current implementation status:
   - `GET /health`
   - `GET /config`
   - `DELETE /sources/{id}`
-- SvelteKit frontend with:
-  - chat interface
-  - provider/model selector
-  - source and language filters
-  - regime toggle for AI Act vs Digital Omnibus on AI proposal
-  - confidence and citation display
+- SvelteKit frontend with chat, catalog, source filters, and citations
 - Containerized deployment with separate backend and frontend images
 
 ## Quickstart
@@ -63,7 +47,7 @@ Run the backend locally:
 uvicorn api.main:app --reload
 ```
 
-Run the frontend locally (the full app is now served at `/app`, the root path is a static showcase page):
+Run the frontend locally (the full app is served at `/app`, the landing page lives at `/`, and the demo is `/demo`):
 
 ```bash
 cd frontend

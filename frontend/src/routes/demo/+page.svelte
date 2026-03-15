@@ -1,8 +1,8 @@
 <svelte:head>
-  <title>Koala Demo — Interactive Walkthrough</title>
+  <title>Koala Demo — Full Workflow</title>
   <meta
     name="description"
-    content="Explore the Koala demo: Chat, Catalog, AI Setup, and Help in a full-page interactive walkthrough of the EU AI Act governance assistant."
+    content="Full-page Koala demo with Chat, Catalog, KPIs, AI Setup, and Help. Scripted responses show the EU AI Act workflow without a backend."
   />
 </svelte:head>
 
@@ -10,6 +10,7 @@
   const demoTabs = [
     { id: 'chat', label: 'Chat' },
     { id: 'catalog', label: 'Catalog' },
+    { id: 'kpis', label: 'KPIs' },
     { id: 'setup', label: 'AI Setup' },
     { id: 'help', label: 'Help' }
   ] as const;
@@ -49,10 +50,10 @@
       subtitle: 'High-risk assessment',
       role: 'Deployer',
       system: 'Office entry facial recognition',
-      question: 'What does high-risk classification mean for my system?',
+      question: 'Is our office entry face scanner high-risk? What must we do before deployment?',
       answer:
-        'High-risk systems are listed in Annex III and require risk management, data governance, technical documentation, and human oversight. As a Deployer, you must ensure compliance measures are implemented and documented. [1]',
-      sources: 'Annex III, Articles 9–17, Article 29.'
+        'Likely high-risk because it is biometric identification in a workplace. Before deployment you must run risk management (Art. 9), document data governance (Art. 10), keep logs (Art. 12), and ensure human oversight (Art. 14). Registration may be required (Art. 60). [1]',
+      sources: 'Annex III, Articles 9–14, Article 60.'
     },
     {
       id: 'candidate-screening',
@@ -62,8 +63,8 @@
       system: 'Candidate screening classifier',
       question: 'What documentation obligations apply to a hiring system?',
       answer:
-        'Hiring systems are likely high-risk. Providers must maintain technical documentation, risk management files, and clear instructions for deployers. Conformity assessments and post-market monitoring are also required. [1]',
-      sources: 'Annex III, Articles 9–17, Article 61.'
+        'Employment screening is in Annex III. As the Provider, you must complete conformity assessment, maintain technical documentation, and provide deployer instructions. Post-market monitoring is not optional. [1]',
+      sources: 'Annex III, Articles 11, 19, 61.'
     },
     {
       id: 'support-chatbot',
@@ -73,7 +74,7 @@
       system: 'Customer support chatbot',
       question: 'What transparency obligations apply to a customer support chatbot?',
       answer:
-        'Deployers must inform users that they are interacting with an AI system and provide accessible guidance on escalation to a human agent when needed. [1]',
+        'Tell users they are speaking to AI and how to reach a human. If the bot produces synthetic content, label it. [1]',
       sources: 'Article 50.'
     }
   ];
@@ -110,31 +111,31 @@
       id: 'context',
       title: 'Context',
       body:
-        'Context is the AI system description and your role. It keeps answers focused on the obligations that apply to you.'
+        'If context is blank, answers are generic. Put the system description and your role here first.'
     },
     {
       id: 'sources',
       title: 'Source filters',
       body:
-        'Source filters limit citations to the AI Act sources you select. Use them to stay aligned with the Act version you are reviewing.'
+        'Filters decide which AI Act sources are allowed. Use them to stay aligned with the version you are citing.'
     },
     {
       id: 'snapshot',
       title: 'Index snapshot',
       body:
-        'The index snapshot is the dated set of AI Act sources currently ingested. It signals which version the answers are grounded in.'
+        'The snapshot date is the evidence base for every answer. If it is outdated, your answer is outdated.'
     },
     {
       id: 'catalog',
       title: 'Catalog',
       body:
-        'The catalog stores your AI systems, their uses, and risk notes. It is the backbone for contextual answers.'
+        'If it is not in the catalog, it is not governable. Start there before asking questions.'
     },
     {
       id: 'setup',
       title: 'AI Setup',
       body:
-        'AI Setup lets you choose a provider, model, and retrieval depth. It also shows estimated usage so you stay in control.'
+        'AI Setup chooses model and retrieval depth. In this demo it is simulated; locally it is real.'
     }
   ];
 
@@ -165,11 +166,17 @@
   let copyTimeout: ReturnType<typeof setTimeout> | null = null;
 
   $: demoEstimatedCost = ((setupCostInput + setupCostOutput) * (setupMaxTokens / 1_000_000)).toFixed(4);
+  $: totalSystems = demoCatalog.length;
+  $: highRiskCount = demoCatalog.filter((item) => item.status === 'High risk').length;
+  $: limitedRiskCount = demoCatalog.filter((item) => item.status === 'Limited risk').length;
+  $: minimalRiskCount = demoCatalog.filter((item) => item.status === 'Minimal risk').length;
+  $: unassessedCount = demoCatalog.filter((item) => item.status === 'Unassessed').length;
+  $: coverageScore = Math.round(((totalSystems - unassessedCount) / Math.max(totalSystems, 1)) * 100);
 
   const fallbackAnswer =
-    'This is a simulated response. Run Koala locally for grounded answers, citations, and full analysis workflows.';
+    'This demo only answers the suggested questions. Run Koala locally for real queries, citations, and analysis.';
 
-  const fallbackSources = 'Simulated demo response.';
+  const fallbackSources = 'Demo response only.';
 
   function applyDemo(item: (typeof demoConversations)[number]) {
     demoQuestion = item.question;
@@ -286,13 +293,13 @@
     <div class="hero-content">
       <div class="badge-row">
         <span class="badge">EU AI Act · In force</span>
-        <span class="badge badge-muted">Amendments indexed · Digital Omnibus proposal</span>
-        <span class="badge badge-outline">Demo is simulated</span>
+        <span class="badge badge-muted">Indexed: COM(2025) 836 proposal</span>
+        <span class="badge badge-outline">Scripted demo</span>
       </div>
       <h1>Interactive Koala demo</h1>
       <p class="lede">
-        Explore the Chat, Catalog, AI Setup, and Help flows in one place. This demo is interactive but uses static data
-        so it can run without a backend.
+        This full-page walkthrough shows how Koala handles Chat, Catalog, KPIs, AI Setup, and Help. Responses are
+        scripted to keep the demo fast and reliable. The real engine runs locally.
       </p>
       <div class="cta-row">
         <a class="button ghost" href="/">Back to overview</a>
@@ -302,12 +309,12 @@
       </div>
     </div>
     <div class="hero-card">
-      <h2>Try these flows</h2>
+      <h2>What you can test here</h2>
       <ul class="feature-list">
-        <li>Switch between Chat, Catalog, AI Setup, and Help</li>
-        <li>Add a catalog entry and see the counts update</li>
-        <li>Adjust retrieved chunks and cost estimates</li>
-        <li>Copy an answer to simulate governance notes</li>
+        <li>Switch between Chat, Catalog, KPIs, AI Setup, and Help</li>
+        <li>Add a catalog entry and watch the KPIs update</li>
+        <li>Adjust retrieval depth and cost assumptions</li>
+        <li>Copy an answer as a governance note</li>
       </ul>
     </div>
   </section>
@@ -333,6 +340,8 @@
               History
             {:else if demoTab === 'catalog'}
               Catalog list
+            {:else if demoTab === 'kpis'}
+              KPI snapshot
             {:else if demoTab === 'setup'}
               Setup sections
             {:else}
@@ -344,6 +353,8 @@
               {demoConversations.length}
             {:else if demoTab === 'catalog'}
               {demoCatalog.length}
+            {:else if demoTab === 'kpis'}
+              4
             {:else if demoTab === 'setup'}
               {demoSetupSections.length}
             {:else}
@@ -372,6 +383,23 @@
                 <span class={`status-pill ${item.status.toLowerCase().replace(' ', '-')}`}>{item.status}</span>
               </div>
             {/each}
+          {:else if demoTab === 'kpis'}
+            <div class="demo-item catalog-item">
+              <p>Coverage score</p>
+              <span>{coverageScore}%</span>
+            </div>
+            <div class="demo-item catalog-item">
+              <p>High-risk systems</p>
+              <span>{highRiskCount}</span>
+            </div>
+            <div class="demo-item catalog-item">
+              <p>Unassessed</p>
+              <span>{unassessedCount}</span>
+            </div>
+            <div class="demo-item catalog-item">
+              <p>Ready for audit</p>
+              <span>{Math.max(totalSystems - unassessedCount, 0)}</span>
+            </div>
           {:else if demoTab === 'setup'}
             {#each demoSetupSections as section}
               <div class="demo-item catalog-item">
@@ -394,7 +422,7 @@
         <section class="demo-panel demo-chat">
           <div class="panel-header">
             <span>Chat</span>
-            <span class="badge badge-outline">Simulated</span>
+            <span class="badge badge-outline">Scripted</span>
           </div>
           <div class="chat-bubble user">{demoQuestion}</div>
           <div class="chat-bubble assistant">
@@ -403,14 +431,13 @@
               {demoCopied ? 'Copied' : 'Copy answer'}
             </button>
           </div>
-          <div class="chat-bubble assistant note">
-            Sources cited: {demoSources}
-          </div>
+          <div class="chat-bubble assistant note">Sources cited: {demoSources}</div>
           <div class="suggested">
             {#each suggestedQuestions as question}
               <button type="button" on:click={() => pickSuggestion(question)}>{question}</button>
             {/each}
           </div>
+          <p class="demo-note">This demo answers the suggested questions only.</p>
           <div class="chat-input">
             <input
               type="text"
@@ -467,6 +494,54 @@
                 <span class={`status-pill ${item.status.toLowerCase().replace(' ', '-')}`}>{item.status}</span>
               </div>
             {/each}
+          </div>
+        </section>
+      {:else if demoTab === 'kpis'}
+        <section class="demo-panel demo-kpis">
+          <div class="panel-header">
+            <span>KPIs</span>
+            <span class="badge badge-outline">Simulated</span>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <span>Systems registered</span>
+              <strong>{totalSystems}</strong>
+            </div>
+            <div class="kpi-card">
+              <span>Coverage score</span>
+              <strong>{coverageScore}%</strong>
+            </div>
+            <div class="kpi-card">
+              <span>High-risk systems</span>
+              <strong>{highRiskCount}</strong>
+            </div>
+            <div class="kpi-card">
+              <span>Unassessed</span>
+              <strong>{unassessedCount}</strong>
+            </div>
+          </div>
+          <div class="kpi-breakdown">
+            <h3>Risk distribution</h3>
+            <div class="kpi-row">
+              <span>High risk</span>
+              <div class="kpi-bar"><span style={`width: ${(highRiskCount / Math.max(totalSystems, 1)) * 100}%`}></span></div>
+              <strong>{highRiskCount}</strong>
+            </div>
+            <div class="kpi-row">
+              <span>Limited risk</span>
+              <div class="kpi-bar"><span style={`width: ${(limitedRiskCount / Math.max(totalSystems, 1)) * 100}%`}></span></div>
+              <strong>{limitedRiskCount}</strong>
+            </div>
+            <div class="kpi-row">
+              <span>Minimal risk</span>
+              <div class="kpi-bar"><span style={`width: ${(minimalRiskCount / Math.max(totalSystems, 1)) * 100}%`}></span></div>
+              <strong>{minimalRiskCount}</strong>
+            </div>
+            <div class="kpi-row">
+              <span>Unassessed</span>
+              <div class="kpi-bar"><span style={`width: ${(unassessedCount / Math.max(totalSystems, 1)) * 100}%`}></span></div>
+              <strong>{unassessedCount}</strong>
+            </div>
           </div>
         </section>
       {:else if demoTab === 'setup'}
@@ -562,6 +637,8 @@
               Context
             {:else if demoTab === 'catalog'}
               Catalog summary
+            {:else if demoTab === 'kpis'}
+              KPI summary
             {:else if demoTab === 'setup'}
               Setup summary
             {:else}
@@ -586,15 +663,28 @@
         {:else if demoTab === 'catalog'}
           <div class="context-row">
             <span>Total systems</span>
-            <strong>{demoCatalog.length}</strong>
+            <strong>{totalSystems}</strong>
           </div>
           <div class="context-row">
             <span>High risk</span>
-            <strong>{demoCatalog.filter((item) => item.status === 'High risk').length}</strong>
+            <strong>{highRiskCount}</strong>
           </div>
           <div class="context-row">
             <span>Unassessed</span>
-            <strong>{demoCatalog.filter((item) => item.status === 'Unassessed').length}</strong>
+            <strong>{unassessedCount}</strong>
+          </div>
+        {:else if demoTab === 'kpis'}
+          <div class="context-row">
+            <span>Coverage score</span>
+            <strong>{coverageScore}%</strong>
+          </div>
+          <div class="context-row">
+            <span>Ready for audit</span>
+            <strong>{Math.max(totalSystems - unassessedCount, 0)}</strong>
+          </div>
+          <div class="context-row">
+            <span>Next action</span>
+            <strong>Assess remaining systems</strong>
           </div>
         {:else if demoTab === 'setup'}
           <div class="context-row">
@@ -630,7 +720,7 @@
       </aside>
     </div>
     <p class="demo-disclaimer">
-      This demo is a static mock. For the full experience with ingestion, retrieval, and citations, run Koala locally.
+      This demo is a scripted mock. No data leaves your browser, and no backend is called.
     </p>
   </section>
 </main>
@@ -815,6 +905,7 @@
     border-radius: 999px;
     border: 1px solid #e0d0c1;
     margin-bottom: 14px;
+    flex-wrap: wrap;
   }
 
   .demo-tabs button {
@@ -857,6 +948,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    min-width: 0;
   }
 
   .panel-header {
@@ -910,7 +1002,8 @@
   .demo-chat,
   .demo-catalog,
   .demo-setup,
-  .demo-help {
+  .demo-help,
+  .demo-kpis {
     gap: 16px;
   }
 
@@ -969,6 +1062,12 @@
   .suggested button:focus-visible {
     outline: 2px solid #6a4a32;
     outline-offset: 2px;
+  }
+
+  .demo-note {
+    margin: 0;
+    font-size: 12px;
+    color: #6b5b4d;
   }
 
   .chat-input {
@@ -1102,6 +1201,63 @@
     color: #6b5b4d;
   }
 
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .kpi-card {
+    background: #f7efe7;
+    border-radius: 14px;
+    padding: 12px;
+    border: 1px solid #eadccf;
+    display: grid;
+    gap: 8px;
+    font-size: 12px;
+    color: #5d4c3f;
+  }
+
+  .kpi-card strong {
+    font-size: 20px;
+    color: #2f241b;
+  }
+
+  .kpi-breakdown {
+    background: #fffaf5;
+    border: 1px solid #eadccf;
+    border-radius: 14px;
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .kpi-breakdown h3 {
+    margin: 0;
+  }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 40px;
+    gap: 10px;
+    align-items: center;
+    font-size: 12px;
+    color: #6b5b4d;
+  }
+
+  .kpi-bar {
+    background: #f1e6da;
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  .kpi-bar span {
+    display: block;
+    height: 100%;
+    background: #6a4a32;
+  }
+
   .setup-group {
     display: grid;
     gap: 8px;
@@ -1232,6 +1388,46 @@
 
     .demo-shell {
       grid-template-columns: 1fr;
+      min-height: auto;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .page {
+      padding: 20px 18px 56px;
+    }
+
+    .topbar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .demo-shell {
+      padding: 14px;
+      border-radius: 18px;
+    }
+
+    .demo-tabs {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .hero-content h1 {
+      font-size: 32px;
+    }
+
+    .chat-input {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .chat-input button {
+      width: 100%;
+    }
+
+    .catalog-row {
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 </style>

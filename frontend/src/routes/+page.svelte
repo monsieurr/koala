@@ -2,62 +2,46 @@
   <title>Koala — AI Act Governance Assistant</title>
   <meta
     name="description"
-    content="Koala is an AI governance assistant for teams that build AI. Ask grounded questions about the EU AI Act, manage your AI system catalog, and understand obligations with clear, role-aware guidance."
+    content="Koala is for compliance teams who need fast, citable answers under the EU AI Act. It turns your AI system inventory into obligations you can defend."
   />
 </svelte:head>
 
 <script lang="ts">
-  const workflow = [
+  const workflowSteps = [
     {
-      title: 'Chat',
-      description: 'Ask grounded questions about obligations, prohibitions, and documentation duties under the EU AI Act.'
+      title: '1. Start with the catalog',
+      body: 'Describe the AI system in plain language. If you cannot explain it clearly, you cannot defend it.'
     },
     {
-      title: 'Catalog',
-      description: 'Register AI systems with clear descriptions so answers are contextual and defensible.'
+      title: '2. Ask obligation questions',
+      body: 'Koala maps that description to the AI Act and returns the specific duties that apply to your role.'
     },
     {
-      title: 'AI Setup',
-      description: 'Configure your assistant and decide how evidence, sources, and roles are applied.'
-    },
-    {
-      title: 'KPIs',
-      description: 'Track portfolio coverage, risk distribution, and systems that still need analysis.'
-    },
-    {
-      title: 'Help',
-      description: 'Plain-language definitions for context, sources, and snapshots with links to guidance.'
+      title: '3. Document and act',
+      body: 'Copy the citations into your governance notes and move the system toward compliance with confidence.'
     }
-  ];
-
-  const features = [
-    'EU AI Act only, with amendments presented as updates to the Act',
-    'Risk tier explanations grounded in the regulation and its annexes',
-    'Catalog-driven answers that reflect the role you are reviewing as',
-    'Copyable answers and citations for internal governance notes',
-    'Offline-friendly demo that shows the workflow without technical setup'
   ];
 
   const riskLevels = [
     {
       title: 'Prohibited',
-      description: 'Practices banned under Article 5, such as manipulative or exploitative uses.'
+      description: 'If it manipulates or exploits people, it is banned under Article 5. Stop here.'
     },
     {
       title: 'High Risk',
-      description: 'Systems listed in Annex III or those in regulated domains with strict obligations.'
+      description: 'If it appears in Annex III, you must treat it like a regulated product with full obligations.'
     },
     {
       title: 'Limited Risk',
-      description: 'Transparency obligations apply, including disclosures for certain AI interactions.'
+      description: 'Transparency still applies. Users must know when they are interacting with AI.'
     },
     {
       title: 'Minimal Risk',
-      description: 'No specific obligations beyond general principles and good practice.'
+      description: 'No extra duties, but you still need to justify why you classify it as minimal.'
     },
     {
       title: 'General Purpose',
-      description: 'GPAI obligations and model-level transparency requirements where applicable.'
+      description: 'Model-level duties apply even if you are not the final deployer.'
     }
   ];
 </script>
@@ -84,14 +68,14 @@
     <div class="hero-content">
       <div class="badge-row">
         <span class="badge">EU AI Act · In force</span>
-        <span class="badge badge-muted">Amendments indexed · Digital Omnibus proposal</span>
+        <span class="badge badge-muted">Indexed: COM(2025) 836 proposal</span>
         <span class="badge badge-outline">Demo is simulated</span>
       </div>
-      <h1>Grounded AI Act answers for compliance teams who ship real AI.</h1>
+      <h1>Turn your AI system list into obligations you can defend.</h1>
       <p class="lede">
-        Koala is an open-source governance assistant that helps compliance officers catalog AI systems, understand risk
-        tiers, and ask practical questions about obligations under Regulation (EU) 2024/1689. This page introduces the
-        product and links to a full-page interactive demo.
+        Koala is built for compliance officers who need real answers under Regulation (EU) 2024/1689. It links your AI
+        system catalog to the exact articles that apply, so you can respond to audit and legal requests with citations,
+        not guesswork.
       </p>
       <div class="cta-row">
         <a class="button primary" href="https://github.com/monsieurr/koala" target="_blank" rel="noreferrer">
@@ -100,46 +84,52 @@
         <a class="button ghost" href="/demo">Open the demo</a>
       </div>
       <p class="hero-note">
-        Scope locked to the EU AI Act. Updates such as the Digital Omnibus proposal are presented as amendments, never
-        as a separate regime.
+        Scope is EU AI Act only. Omnibus updates are treated as amendments, never as a separate regime.
       </p>
     </div>
     <div class="hero-card">
-      <h2>What Koala does</h2>
-      <ul class="feature-list">
-        {#each features as feature}
-          <li>{feature}</li>
-        {/each}
-      </ul>
+      <h2>Why Koala exists</h2>
+      <p>
+        Most AI compliance tools answer in abstractions. Koala starts with a system description and ends with a clear
+        list of duties you can actually act on.
+      </p>
+      <p>
+        The public demo is scripted for speed. The full product runs locally with citations, ingestion, and RAG.
+      </p>
+      <div class="hero-claims">
+        <span>Catalog-first workflow</span>
+        <span>Citations over summaries</span>
+        <span>Built for compliance officers</span>
+      </div>
     </div>
   </section>
 
   <section class="section" id="workflow">
     <div class="section-header">
-      <h2>How it fits a compliance workflow</h2>
-      <p>Each area supports a single task: understanding obligations and documenting them clearly.</p>
+      <h2>A workflow that matches how compliance teams operate</h2>
+      <p>Short, opinionated, and designed to create an audit trail.</p>
     </div>
-    <div class="card-grid">
-      {#each workflow as item}
-        <article class="card">
-          <h3>{item.title}</h3>
-          <p>{item.description}</p>
-        </article>
+    <ol class="workflow-list">
+      {#each workflowSteps as step}
+        <li>
+          <h3>{step.title}</h3>
+          <p>{step.body}</p>
+        </li>
       {/each}
-    </div>
+    </ol>
   </section>
 
   <section class="section" id="demo">
     <div class="section-header">
       <h2>Interactive demo</h2>
-      <p>Explore the full product flow in a standalone, interactive walkthrough.</p>
+      <p>See the full product flow on a dedicated page. No backend required.</p>
     </div>
     <div class="demo-cta">
       <div>
         <h3>Full-page walkthrough</h3>
         <p>
-          The demo includes Chat, Catalog, AI Setup, and Help — with interactive controls and a realistic UI. It is
-          simulated for the web, and the full RAG experience is available locally.
+          The demo includes Chat, Catalog, KPIs, AI Setup, and Help. It is a guided simulation that shows the UX without
+          any infrastructure setup.
         </p>
       </div>
       <a class="button primary" href="/demo">Launch the demo</a>
@@ -148,8 +138,8 @@
 
   <section class="section" id="risk">
     <div class="section-header">
-      <h2>AI Act risk levels, explained plainly</h2>
-      <p>Koala highlights obligations by risk tier so compliance teams can focus quickly.</p>
+      <h2>Risk levels, without the fog</h2>
+      <p>Koala forces a decision: is it in Annex III, or not? Everything else follows from that.</p>
     </div>
     <div class="card-grid">
       {#each riskLevels as level}
@@ -166,8 +156,8 @@
       <div>
         <h2>Want the real product experience?</h2>
         <p>
-          Clone Koala and run it locally for full RAG, PDF ingestion, and AI system analysis. The GitHub README includes
-          setup steps and sample data.
+          Run Koala locally for full RAG, PDF ingestion, and AI system analysis. The GitHub README includes setup steps
+          and sample data. The full app is served at <code>/app</code> in local mode.
         </p>
       </div>
       <a class="button primary" href="https://github.com/monsieurr/koala" target="_blank" rel="noreferrer">
@@ -245,7 +235,7 @@
 
   .hero {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
     gap: 32px;
     align-items: start;
     margin-bottom: 48px;
@@ -328,18 +318,27 @@
     border-radius: 20px;
     padding: 24px;
     box-shadow: 0 20px 40px rgba(40, 28, 18, 0.08);
+    display: grid;
+    gap: 16px;
   }
 
   .hero-card h2 {
-    margin-top: 0;
+    margin: 0;
   }
 
-  .feature-list {
-    list-style: disc;
-    padding-left: 18px;
-    margin: 12px 0 0;
-    color: #4a392c;
-    line-height: 1.6;
+  .hero-claims {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .hero-claims span {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #f1e6da;
+    font-size: 12px;
+    font-weight: 600;
+    color: #5d4c3f;
   }
 
   .section {
@@ -353,6 +352,25 @@
   .section-header p {
     margin: 0 0 24px;
     color: #5d4c3f;
+  }
+
+  .workflow-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+  }
+
+  .workflow-list li {
+    background: #fffaf5;
+    border-radius: 16px;
+    padding: 18px;
+    border: 1px solid #eadccf;
+  }
+
+  .workflow-list h3 {
+    margin: 0 0 6px;
   }
 
   .card-grid {
