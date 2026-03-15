@@ -4,6 +4,9 @@ Koala is an open-source, self-hostable assistant for compliance teams who need d
 It starts with your AI system catalog and ends with citations you can paste into governance notes. The Digital Omnibus
 proposal is treated as an amendment to the AI Act, not a separate regime.
 
+![Koala — Main page](public/screenshots/screenshot_overview_koala.png)
+
+
 ## What it does today
 
 - Ingests AI Act sources (including the Omnibus proposal) into a searchable index.
