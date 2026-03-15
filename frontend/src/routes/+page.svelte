@@ -61,6 +61,41 @@
     }
   ];
 
+  const demoTabs = [
+    { id: 'chat', label: 'Chat' },
+    { id: 'catalog', label: 'Catalog' },
+    { id: 'setup', label: 'AI Setup' },
+    { id: 'help', label: 'Help' }
+  ] as const;
+
+  type DemoTab = (typeof demoTabs)[number]['id'];
+
+  const demoCatalogSeed = [
+    {
+      id: 'face-entry',
+      name: 'Office entry face scanner',
+      type: 'Biometric identification',
+      status: 'High risk',
+      catalog: 'Default'
+    },
+    {
+      id: 'candidate-screening',
+      name: 'Candidate screening classifier',
+      type: 'Employment screening',
+      status: 'High risk',
+      catalog: 'Default'
+    },
+    {
+      id: 'support-chatbot',
+      name: 'Customer support chatbot',
+      type: 'Customer assistance',
+      status: 'Limited risk',
+      catalog: 'Default'
+    }
+  ];
+
+  const catalogStatuses = ['Unassessed', 'High risk', 'Limited risk', 'Minimal risk'];
+
   const demoConversations = [
     {
       id: 'facial-entry',
@@ -99,6 +134,77 @@
 
   const suggestedQuestions = demoConversations.map((item) => item.question);
 
+  const demoSetupSections = [
+    'Provider',
+    'Model',
+    'Retrieval',
+    'Costs',
+    'Privacy'
+  ];
+
+  const demoHelpTopics = [
+    'Context',
+    'Source filters',
+    'Index snapshot',
+    'Catalog',
+    'AI Setup'
+  ];
+
+  const demoProviders = [
+    {
+      id: 'custom',
+      label: 'Custom API (OpenAI-compatible)',
+      model: 'gpt-4.1-mini',
+      apiBase: 'https://api.your-provider.com/v1'
+    },
+    {
+      id: 'claude',
+      label: 'Claude-compatible',
+      model: 'claude-sonnet-4-0',
+      apiBase: 'https://api.anthropic.com'
+    },
+    {
+      id: 'gemini',
+      label: 'Gemini-compatible',
+      model: 'gemini-2.5-pro',
+      apiBase: 'https://generativelanguage.googleapis.com/v1beta'
+    }
+  ];
+
+  const helpItems = [
+    {
+      id: 'context',
+      title: 'Context',
+      body:
+        'Context is the AI system description and your role. It keeps answers focused on the obligations that apply to you.'
+    },
+    {
+      id: 'sources',
+      title: 'Source filters',
+      body:
+        'Source filters limit citations to the AI Act sources you select. Use them to stay aligned with the Act version you are reviewing.'
+    },
+    {
+      id: 'snapshot',
+      title: 'Index snapshot',
+      body:
+        'The index snapshot is the dated set of AI Act sources currently ingested. It signals which version the answers are grounded in.'
+    },
+    {
+      id: 'catalog',
+      title: 'Catalog',
+      body:
+        'The catalog stores your AI systems, their uses, and risk notes. It is the backbone for contextual answers.'
+    },
+    {
+      id: 'setup',
+      title: 'AI Setup',
+      body:
+        'AI Setup lets you choose a provider, model, and retrieval depth. It also shows estimated usage so you stay in control.'
+    }
+  ];
+
+  let demoTab: DemoTab = 'chat';
   let activeDemoId = demoConversations[0].id;
   let demoInput = demoConversations[0].question;
   let demoQuestion = demoConversations[0].question;
@@ -107,7 +213,24 @@
   let demoRole = demoConversations[0].role;
   let demoSystem = demoConversations[0].system;
   let demoCopied = false;
+  let demoCatalog = [...demoCatalogSeed];
+  let showCatalogForm = false;
+  let newSystemName = '';
+  let newSystemType = '';
+  let newSystemStatus = catalogStatuses[0];
+  let selectedProvider = demoProviders[0];
+  let setupModel = selectedProvider.model;
+  let setupApiBase = selectedProvider.apiBase;
+  let setupMaxTokens = 800;
+  let setupChunks = 5;
+  let setupCostInput = 4;
+  let setupCostOutput = 12;
+  let openHelpId = helpItems[0].id;
+  let demoEstimatedCost = '0.00';
+
   let copyTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  $: demoEstimatedCost = ((setupCostInput + setupCostOutput) * (setupMaxTokens / 1_000_000)).toFixed(4);
 
   const fallbackAnswer =
     'This is a simulated response. Run Koala locally for grounded answers, citations, and full analysis workflows.';
@@ -169,6 +292,44 @@
   function pickSuggestion(question: string) {
     demoInput = question;
     handleAsk();
+  }
+
+  function openCatalogForm() {
+    showCatalogForm = true;
+    newSystemName = '';
+    newSystemType = '';
+    newSystemStatus = catalogStatuses[0];
+  }
+
+  function addCatalogSystem() {
+    if (!newSystemName.trim()) {
+      return;
+    }
+    demoCatalog = [
+      {
+        id: `${Date.now()}`,
+        name: newSystemName.trim(),
+        type: newSystemType.trim() || 'AI system',
+        status: newSystemStatus,
+        catalog: 'Default'
+      },
+      ...demoCatalog
+    ];
+    showCatalogForm = false;
+  }
+
+  function selectProvider(providerId: string) {
+    const provider = demoProviders.find((item) => item.id === providerId);
+    if (!provider) {
+      return;
+    }
+    selectedProvider = provider;
+    setupModel = provider.model;
+    setupApiBase = provider.apiBase;
+  }
+
+  function toggleHelp(id: string) {
+    openHelpId = openHelpId === id ? '' : id;
   }
 </script>
 
@@ -244,75 +405,312 @@
       <h2>Placeholder demo</h2>
       <p>A realistic walkthrough of the interface, without a live backend.</p>
     </div>
+    <div class="demo-tabs" role="tablist" aria-label="Demo views">
+      {#each demoTabs as tab}
+        <button
+          type="button"
+          class:active={demoTab === tab.id}
+          on:click={() => (demoTab = tab.id)}
+          aria-pressed={demoTab === tab.id}
+        >
+          {tab.label}
+        </button>
+      {/each}
+    </div>
     <div class="demo-shell">
       <aside class="demo-panel demo-history">
         <div class="panel-header">
-          <span>History</span>
-          <span class="pill">3</span>
+          <span>
+            {#if demoTab === 'chat'}
+              History
+            {:else if demoTab === 'catalog'}
+              Catalog list
+            {:else if demoTab === 'setup'}
+              Setup sections
+            {:else}
+              Help topics
+            {/if}
+          </span>
+          <span class="pill">
+            {#if demoTab === 'chat'}
+              {demoConversations.length}
+            {:else if demoTab === 'catalog'}
+              {demoCatalog.length}
+            {:else if demoTab === 'setup'}
+              {demoSetupSections.length}
+            {:else}
+              {demoHelpTopics.length}
+            {/if}
+          </span>
         </div>
         <div class="demo-list">
-          {#each demoConversations as item}
-            <button
-              class={`demo-item ${item.id === activeDemoId ? 'active' : ''}`}
-              type="button"
-              on:click={() => selectDemo(item)}
-              aria-pressed={item.id === activeDemoId}
-            >
-              <p>{item.title}</p>
-              <span>{item.subtitle}</span>
-            </button>
-          {/each}
+          {#if demoTab === 'chat'}
+            {#each demoConversations as item}
+              <button
+                class={`demo-item ${item.id === activeDemoId ? 'active' : ''}`}
+                type="button"
+                on:click={() => selectDemo(item)}
+                aria-pressed={item.id === activeDemoId}
+              >
+                <p>{item.title}</p>
+                <span>{item.subtitle}</span>
+              </button>
+            {/each}
+          {:else if demoTab === 'catalog'}
+            {#each demoCatalog as item}
+              <div class="demo-item catalog-item">
+                <p>{item.name}</p>
+                <span>{item.type}</span>
+                <span class={`status-pill ${item.status.toLowerCase().replace(' ', '-')}`}>{item.status}</span>
+              </div>
+            {/each}
+          {:else if demoTab === 'setup'}
+            {#each demoSetupSections as section}
+              <div class="demo-item catalog-item">
+                <p>{section}</p>
+                <span>Adjust settings and model selection</span>
+              </div>
+            {/each}
+          {:else}
+            {#each demoHelpTopics as topic}
+              <div class="demo-item catalog-item">
+                <p>{topic}</p>
+                <span>Guidance and definitions</span>
+              </div>
+            {/each}
+          {/if}
         </div>
       </aside>
 
-      <section class="demo-panel demo-chat">
-        <div class="panel-header">
-          <span>Chat</span>
-          <span class="badge badge-outline">Simulated</span>
-        </div>
-        <div class="chat-bubble user">{demoQuestion}</div>
-        <div class="chat-bubble assistant">
-          {demoAnswer}
-          <button class="copy" type="button" on:click={handleCopy}>
-            {demoCopied ? 'Copied' : 'Copy answer'}
-          </button>
-        </div>
-        <div class="chat-bubble assistant note">
-          Sources cited: {demoSources}
-        </div>
-        <div class="suggested">
-          {#each suggestedQuestions as question}
-            <button type="button" on:click={() => pickSuggestion(question)}>{question}</button>
-          {/each}
-        </div>
-        <div class="chat-input">
-          <input
-            type="text"
-            bind:value={demoInput}
-            placeholder="Ask a compliance question…"
-            aria-label="Ask a compliance question"
-          />
-          <button type="button" on:click={handleAsk}>Ask</button>
-        </div>
-      </section>
+      {#if demoTab === 'chat'}
+        <section class="demo-panel demo-chat">
+          <div class="panel-header">
+            <span>Chat</span>
+            <span class="badge badge-outline">Simulated</span>
+          </div>
+          <div class="chat-bubble user">{demoQuestion}</div>
+          <div class="chat-bubble assistant">
+            {demoAnswer}
+            <button class="copy" type="button" on:click={handleCopy}>
+              {demoCopied ? 'Copied' : 'Copy answer'}
+            </button>
+          </div>
+          <div class="chat-bubble assistant note">
+            Sources cited: {demoSources}
+          </div>
+          <div class="suggested">
+            {#each suggestedQuestions as question}
+              <button type="button" on:click={() => pickSuggestion(question)}>{question}</button>
+            {/each}
+          </div>
+          <div class="chat-input">
+            <input
+              type="text"
+              bind:value={demoInput}
+              placeholder="Ask a compliance question…"
+              aria-label="Ask a compliance question"
+            />
+            <button type="button" on:click={handleAsk}>Ask</button>
+          </div>
+        </section>
+      {:else}
+        {#if demoTab === 'catalog'}
+          <section class="demo-panel demo-catalog">
+            <div class="panel-header">
+              <span>Catalog</span>
+              <span class="badge badge-outline">Simulated</span>
+            </div>
+            <div class="catalog-toolbar">
+              <button class="button tiny" type="button" on:click={openCatalogForm}>New system</button>
+              <span class="catalog-count">{demoCatalog.length} systems</span>
+            </div>
+            {#if showCatalogForm}
+              <div class="catalog-form">
+                <label>
+                  System name
+                  <input type="text" bind:value={newSystemName} placeholder="e.g. Branch access face scanner" />
+                </label>
+                <label>
+                  Type
+                  <input type="text" bind:value={newSystemType} placeholder="e.g. biometric identification" />
+                </label>
+                <label>
+                  Status
+                  <select bind:value={newSystemStatus}>
+                    {#each catalogStatuses as status}
+                      <option value={status}>{status}</option>
+                    {/each}
+                  </select>
+                </label>
+                <div class="catalog-actions">
+                  <button class="button ghost tiny" type="button" on:click={() => (showCatalogForm = false)}>
+                    Cancel
+                  </button>
+                  <button class="button tiny" type="button" on:click={addCatalogSystem}>Add system</button>
+                </div>
+              </div>
+            {/if}
+            <div class="catalog-list">
+              {#each demoCatalog as item}
+                <div class="catalog-row">
+                  <div>
+                    <strong>{item.name}</strong>
+                    <span>{item.type}</span>
+                  </div>
+                  <span class={`status-pill ${item.status.toLowerCase().replace(' ', '-')}`}>{item.status}</span>
+                </div>
+              {/each}
+            </div>
+          </section>
+        {:else if demoTab === 'setup'}
+          <section class="demo-panel demo-setup">
+            <div class="panel-header">
+              <span>AI Setup</span>
+              <span class="badge badge-outline">Simulated</span>
+            </div>
+            <div class="setup-group">
+              <label>Provider</label>
+              <div class="provider-chips">
+                {#each demoProviders as providerOption}
+                  <button
+                    type="button"
+                    class:active={providerOption.id === selectedProvider.id}
+                    on:click={() => selectProvider(providerOption.id)}
+                  >
+                    {providerOption.label}
+                  </button>
+                {/each}
+              </div>
+            </div>
+            <div class="setup-group">
+              <label>Model ID</label>
+              <input type="text" bind:value={setupModel} />
+            </div>
+            <div class="setup-group">
+              <label>API base URL</label>
+              <input type="text" bind:value={setupApiBase} />
+            </div>
+            <div class="setup-group">
+              <label>API key</label>
+              <input type="password" value="••••••••••••••••" readonly />
+            </div>
+            <div class="setup-group slider-group">
+              <label>Retrieved chunks</label>
+              <div class="slider-row">
+                <input type="range" min="3" max="7" bind:value={setupChunks} />
+                <span>{setupChunks}</span>
+              </div>
+            </div>
+            <div class="setup-group slider-group">
+              <label>Max output tokens</label>
+              <div class="slider-row">
+                <input type="range" min="400" max="1200" step="50" bind:value={setupMaxTokens} />
+                <span>{setupMaxTokens}</span>
+              </div>
+            </div>
+            <div class="setup-group cost-group">
+              <label>Estimated cost per 1M tokens</label>
+              <div class="cost-row">
+                <div>
+                  <span>Input</span>
+                  <input type="number" min="0" step="0.5" bind:value={setupCostInput} />
+                </div>
+                <div>
+                  <span>Output</span>
+                  <input type="number" min="0" step="0.5" bind:value={setupCostOutput} />
+                </div>
+              </div>
+              <p class="cost-note">Estimated per-response cost: ${demoEstimatedCost}</p>
+            </div>
+          </section>
+        {:else}
+          <section class="demo-panel demo-help">
+            <div class="panel-header">
+              <span>Help</span>
+              <span class="badge badge-outline">Simulated</span>
+            </div>
+            <div class="help-list">
+              {#each helpItems as item}
+                <button
+                  class="help-item"
+                  type="button"
+                  on:click={() => toggleHelp(item.id)}
+                  aria-expanded={openHelpId === item.id}
+                >
+                  <span>{item.title}</span>
+                  <span>{openHelpId === item.id ? '−' : '+'}</span>
+                </button>
+                {#if openHelpId === item.id}
+                  <div class="help-body">{item.body}</div>
+                {/if}
+              {/each}
+            </div>
+          </section>
+        {/if}
+      {/if}
 
       <aside class="demo-panel demo-context">
         <div class="panel-header">
-          <span>Context</span>
+          <span>{demoTab === 'chat' ? 'Context' : 'Catalog summary'}</span>
           <span class="badge">EU AI Act · In force</span>
         </div>
-        <div class="context-row">
-          <span>You are reviewing as</span>
-          <strong>{demoRole}</strong>
-        </div>
-        <div class="context-row">
-          <span>System focus</span>
-          <strong>{demoSystem}</strong>
-        </div>
-        <div class="context-row">
-          <span>Sources</span>
-          <strong>AI Act + Omnibus amendment notes</strong>
-        </div>
+        {#if demoTab === 'chat'}
+          <div class="context-row">
+            <span>You are reviewing as</span>
+            <strong>{demoRole}</strong>
+          </div>
+          <div class="context-row">
+            <span>System focus</span>
+            <strong>{demoSystem}</strong>
+          </div>
+          <div class="context-row">
+            <span>Sources</span>
+            <strong>AI Act + Omnibus amendment notes</strong>
+          </div>
+        {:else if demoTab === 'catalog'}
+          <div class="context-row">
+            <span>Total systems</span>
+            <strong>{demoCatalog.length}</strong>
+          </div>
+          <div class="context-row">
+            <span>High risk</span>
+            <strong>{demoCatalog.filter((item) => item.status === 'High risk').length}</strong>
+          </div>
+          <div class="context-row">
+            <span>Unassessed</span>
+            <strong>{demoCatalog.filter((item) => item.status === 'Unassessed').length}</strong>
+          </div>
+        {:else if demoTab === 'setup'}
+          <div class="context-row">
+            <span>Provider</span>
+            <strong>{selectedProvider.label}</strong>
+          </div>
+          <div class="context-row">
+            <span>Retrieved chunks</span>
+            <strong>{setupChunks}</strong>
+          </div>
+          <div class="context-row">
+            <span>Max output tokens</span>
+            <strong>{setupMaxTokens}</strong>
+          </div>
+          <div class="context-row">
+            <span>Privacy note</span>
+            <strong>Keys stay on your device in the demo</strong>
+          </div>
+        {:else}
+          <div class="context-row">
+            <span>Need more help?</span>
+            <strong>See the GitHub README for full guidance.</strong>
+          </div>
+          <div class="context-row">
+            <span>Scope</span>
+            <strong>EU AI Act only</strong>
+          </div>
+          <div class="context-row">
+            <span>Last indexed</span>
+            <strong>Digital Omnibus proposal (COM(2025) 836)</strong>
+          </div>
+        {/if}
       </aside>
     </div>
     <p class="demo-disclaimer">
@@ -520,6 +918,37 @@
     margin: 48px 0;
   }
 
+  .demo-tabs {
+    display: inline-flex;
+    gap: 8px;
+    background: #f7efe7;
+    padding: 6px;
+    border-radius: 999px;
+    border: 1px solid #e0d0c1;
+    margin-bottom: 14px;
+  }
+
+  .demo-tabs button {
+    border: none;
+    background: transparent;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #5d4c3f;
+    font-weight: 600;
+  }
+
+  .demo-tabs button.active {
+    background: #6a4a32;
+    color: #fffaf5;
+  }
+
+  .demo-tabs button:focus-visible {
+    outline: 2px solid #6a4a32;
+    outline-offset: 2px;
+  }
+
   .section-header h2 {
     margin: 0 0 8px;
   }
@@ -596,6 +1025,122 @@
     width: 100%;
     cursor: pointer;
     font: inherit;
+  }
+
+  .demo-item.catalog-item {
+    display: grid;
+    gap: 4px;
+    cursor: default;
+  }
+
+  .demo-setup,
+  .demo-help {
+    gap: 16px;
+  }
+
+  .setup-group {
+    display: grid;
+    gap: 8px;
+    font-size: 12px;
+    color: #5d4c3f;
+  }
+
+  .setup-group input {
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid #d8c8b8;
+    font: inherit;
+    background: #fffaf5;
+    color: #2f241b;
+  }
+
+  .provider-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .provider-chips button {
+    border: 1px solid #e0d0c1;
+    background: #f7efe7;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .provider-chips button.active {
+    background: #6a4a32;
+    color: #fffaf5;
+    border-color: #6a4a32;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .slider-row input[type='range'] {
+    flex: 1;
+    accent-color: #6a4a32;
+  }
+
+  .cost-group {
+    background: #f7efe7;
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid #eadccf;
+  }
+
+  .cost-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .cost-row span {
+    display: block;
+    margin-bottom: 6px;
+    color: #6b5b4d;
+  }
+
+  .cost-note {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: #6b5b4d;
+  }
+
+  .help-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .help-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #e0d0c1;
+    background: #f7efe7;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .help-item:focus-visible {
+    outline: 2px solid #6a4a32;
+    outline-offset: 2px;
+  }
+
+  .help-body {
+    margin-top: -4px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #fffaf5;
+    border: 1px solid #eadccf;
+    font-size: 12px;
+    color: #5d4c3f;
   }
 
   .demo-item.active {
@@ -677,6 +1222,112 @@
   .suggested button:focus-visible {
     outline: 2px solid #6a4a32;
     outline-offset: 2px;
+  }
+
+  .demo-catalog {
+    gap: 16px;
+  }
+
+  .catalog-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .catalog-count {
+    font-size: 12px;
+    color: #6b5b4d;
+  }
+
+  .catalog-form {
+    display: grid;
+    gap: 10px;
+    background: #f7efe7;
+    border-radius: 14px;
+    padding: 12px;
+    border: 1px solid #eadccf;
+  }
+
+  .catalog-form label {
+    display: grid;
+    gap: 6px;
+    font-size: 12px;
+    color: #5d4c3f;
+  }
+
+  .catalog-form input,
+  .catalog-form select {
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid #d8c8b8;
+    font: inherit;
+    background: #fffaf5;
+  }
+
+  .catalog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .button.tiny {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .catalog-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .catalog-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    background: #fffaf5;
+    border: 1px solid #eadccf;
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+
+  .catalog-row strong {
+    display: block;
+  }
+
+  .catalog-row span {
+    font-size: 12px;
+    color: #6b5b4d;
+  }
+
+  .status-pill {
+    align-self: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #efe3d6;
+    color: #6b5b4d;
+  }
+
+  .status-pill.high-risk {
+    background: #e8cbb1;
+    color: #6a4a32;
+  }
+
+  .status-pill.limited-risk {
+    background: #f0d9c7;
+    color: #6a4a32;
+  }
+
+  .status-pill.minimal-risk {
+    background: #f4e9df;
+    color: #6b5b4d;
+  }
+
+  .status-pill.unassessed {
+    background: #f1ede6;
+    color: #6b5b4d;
   }
 
   .chat-input {
