@@ -350,10 +350,7 @@
     }
   }
 
-  $: {
-    if (!browser) {
-      return;
-    }
+  $: if (browser) {
     const lookupKey = provider === 'ollama' ? apiBase.trim() : '';
     if (lookupKey && lookupKey !== lastOllamaLookupKey) {
       lastOllamaLookupKey = lookupKey;
