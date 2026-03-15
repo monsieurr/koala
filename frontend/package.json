@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --host 0.0.0.0 --port 5173",
-    "build": "svelte-kit build",
-    "preview": "svelte-kit preview --host 0.0.0.0 --port 4173",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
     "start": "node build"
   },
   "dependencies": {
