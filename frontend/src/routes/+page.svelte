@@ -122,14 +122,14 @@
   <section class="section" id="demo">
     <div class="section-header">
       <h2>Interactive demo</h2>
-      <p>See the full product flow on a dedicated page. No backend required.</p>
+      <p>See the full product flow on a dedicated page. The live engine runs locally, so the web demo is scripted.</p>
     </div>
     <div class="demo-cta">
       <div>
         <h3>Full-page walkthrough</h3>
         <p>
-          The demo includes Chat, Catalog, KPIs, AI Setup, and Help. It is a guided simulation that shows the UX without
-          any infrastructure setup.
+          The demo includes Chat, Catalog, KPIs, AI Setup, and Help. It is a guided simulation so anyone can try the
+          workflow, but real ingestion and retrieval require local deployment.
         </p>
       </div>
       <a class="button primary" href="/demo">Launch the demo</a>

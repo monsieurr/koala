@@ -81,7 +81,13 @@
 
   const suggestedQuestions = demoConversations.map((item) => item.question);
 
-  const demoSetupSections = ['Provider', 'Model', 'Retrieval', 'Costs', 'Privacy'];
+  const demoSetupSections = [
+    { title: 'Provider', detail: 'Choose an API provider' },
+    { title: 'Model', detail: 'Set the model ID' },
+    { title: 'Retrieval', detail: 'Pick how many chunks to pull' },
+    { title: 'Costs', detail: 'Estimate input/output spend' },
+    { title: 'Privacy', detail: 'Keys stay on your device' }
+  ];
 
   const demoHelpTopics = ['Context', 'Source filters', 'Index snapshot', 'Catalog', 'AI Setup'];
 
@@ -403,8 +409,8 @@
           {:else if demoTab === 'setup'}
             {#each demoSetupSections as section}
               <div class="demo-item catalog-item">
-                <p>{section}</p>
-                <span>Adjust settings and model selection</span>
+                <p>{section.title}</p>
+                <span>{section.detail}</span>
               </div>
             {/each}
           {:else}
@@ -949,6 +955,7 @@
     flex-direction: column;
     gap: 12px;
     min-width: 0;
+    min-height: 0;
   }
 
   .panel-header {
@@ -970,6 +977,9 @@
   .demo-list {
     display: grid;
     gap: 10px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
   }
 
   .demo-item {
@@ -981,12 +991,31 @@
     width: 100%;
     cursor: pointer;
     font: inherit;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .demo-item.catalog-item {
     display: grid;
     gap: 4px;
     cursor: default;
+  }
+
+  .demo-item p {
+    margin: 0;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+  }
+
+  .demo-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .demo-item.active {
@@ -1150,6 +1179,8 @@
   .catalog-list {
     display: grid;
     gap: 10px;
+    overflow-y: auto;
+    padding-right: 4px;
   }
 
   .catalog-row {
@@ -1160,6 +1191,8 @@
     border: 1px solid #eadccf;
     border-radius: 12px;
     padding: 10px 12px;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .catalog-row strong {
