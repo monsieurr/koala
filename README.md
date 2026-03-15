@@ -129,6 +129,14 @@ To enable demo mode in a deployment, set:
 PUBLIC_DEMO_MODE=1
 ```
 
+If you deploy the backend to a serverless platform (e.g., Vercel), use a writable
+directory for Chroma and seed it from the bundled index:
+
+```bash
+CHROMA_PERSIST_DIRECTORY=/tmp/chroma
+KOALA_CHROMA_SEED_DIR=data/chroma
+```
+
 For the **full local deployment** with semantic retrieval and reranking, install the full dependency set:
 
 ```bash

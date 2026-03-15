@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from functools import lru_cache
 import os
+from pathlib import Path
+import shutil
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -57,6 +59,9 @@ class AppSettings(BaseModel):
                 "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173",
             )
         )
+        chroma_persist_directory = os.getenv("CHROMA_PERSIST_DIRECTORY", "data/chroma")
+        if os.getenv("VERCEL") == "1" and chroma_persist_directory.startswith("data/"):
+            chroma_persist_directory = "/tmp/chroma"
         cors_origin_regex = os.getenv("CORS_ORIGIN_REGEX", "").strip()
         if not cors_origin_regex:
             cors_origin_regex = (
@@ -68,7 +73,7 @@ class AppSettings(BaseModel):
             port=int(os.getenv("API_PORT", "8000")),
             cors_origins=cors_origins,
             cors_origin_regex=cors_origin_regex,
-            chroma_persist_directory=os.getenv("CHROMA_PERSIST_DIRECTORY", "data/chroma"),
+            chroma_persist_directory=chroma_persist_directory,
             ai_systems_path=os.getenv("AI_SYSTEMS_PATH", "data/ai_systems.json"),
             chroma_collection_name=os.getenv("CHROMA_COLLECTION_NAME", "legal_documents"),
             embedding_model=os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"),
@@ -128,6 +133,27 @@ def _parse_csv(raw_value: str) -> list[str]:
     return [item.strip() for item in raw_value.split(",") if item.strip()]
 
 
+def _seed_chroma_if_needed(persist_directory: str, seed_directory: str | None) -> None:
+    if not seed_directory:
+        return
+    seed_path = Path(seed_directory)
+    if not seed_path.exists():
+        return
+    persist_path = Path(persist_directory)
+    if persist_path.exists() and any(persist_path.iterdir()):
+        return
+    try:
+        persist_path.mkdir(parents=True, exist_ok=True)
+        for item in seed_path.iterdir():
+            destination = persist_path / item.name
+            if item.is_dir():
+                shutil.copytree(item, destination, dirs_exist_ok=True)
+            else:
+                shutil.copy2(item, destination)
+    except Exception:
+        return
+
+
 @lru_cache
 def get_settings() -> AppSettings:
     return AppSettings.from_env()
@@ -136,6 +162,10 @@ def get_settings() -> AppSettings:
 @lru_cache
 def get_store() -> ChromaVectorStore:
     settings = get_settings()
+    seed_dir = os.getenv("KOALA_CHROMA_SEED_DIR")
+    if os.getenv("VERCEL") == "1" and not seed_dir:
+        seed_dir = "data/chroma"
+    _seed_chroma_if_needed(settings.chroma_persist_directory, seed_dir)
     return ChromaVectorStore(
         persist_directory=settings.chroma_persist_directory,
         collection_name=settings.chroma_collection_name,
