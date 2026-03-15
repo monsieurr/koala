@@ -205,7 +205,7 @@ class ComplianceAnswerChain:
 
         for hit, citation in list(zip(hits, citations))[:4]:
             excerpt = _select_key_sentence(hit.chunk.text) or citation.excerpt
-            title = f" — {citation.title}" if citation.title else ""
+            title = f" : {citation.title}" if citation.title else ""
             summary_lines.append(f"{citation.label}{title}: {excerpt}")
 
         if low_confidence:

@@ -447,7 +447,7 @@
     }
 
     if (issues.length > 0) {
-      setStatus('System warming up — some features unavailable.', 'connection');
+      setStatus('System warming up : some features unavailable.', 'connection');
     } else {
       clearStatus('connection');
     }
@@ -1464,7 +1464,7 @@
 </script>
 
 <svelte:head>
-  <title>Koala — AI Governance Assistant</title>
+  <title>Koala : AI Governance Assistant</title>
   <meta
     name="description"
     content="Open-source AI governance assistant for the EU AI Act and the Digital Omnibus on AI proposal."
@@ -1930,7 +1930,7 @@
                             {analyzingSystemIds.includes(system.id) ? 'Analyzing…' : formatRiskLevel(system.level_of_risk)}
                           </span>
                         </td>
-                        <td>{system.confidence ? `${system.confidence}%` : '—'}</td>
+                        <td>{system.confidence ? `${system.confidence}%` : ':'}</td>
                         <td>
                           <div class="row-actions">
                             <button class="ghost-button compact-ghost" type="button" on:click={() => useSystemInChat(system.id)}>
@@ -1960,7 +1960,7 @@
                               <p class="detail-meta">Sources: {system.analysis_citations.join(', ')}</p>
                             {/if}
                             {#if system.analysis_error}
-                              <p class="soft-error">Analysis unavailable — please retry.</p>
+                              <p class="soft-error">Analysis unavailable : please retry.</p>
                             {/if}
                           </td>
                         </tr>
@@ -2328,7 +2328,7 @@
               </label>
 
               {#if !activeSystem}
-                <p class="muted">No AI system selected — answers will reflect general obligations.</p>
+                <p class="muted">No AI system selected : answers will reflect general obligations.</p>
               {/if}
 
               {#if activeSystem}

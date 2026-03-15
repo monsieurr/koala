@@ -1,4 +1,4 @@
-# Koala — AI Act Governance Assistant
+# Koala : AI Act Governance Assistant
 
 Koala is an open-source, self-hostable assistant for compliance teams who need defensible answers under the EU AI Act.
 It starts with your AI system catalog and ends with citations you can paste into governance notes. The Digital Omnibus
