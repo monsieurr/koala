@@ -1836,8 +1836,9 @@
                 <strong>Demo mode</strong>
                 <p>
                   Catalog entries are stored locally in this browser and will disappear if you clear site data. For the
-                  full version with persistent storage, download or fork Koala from
+                  full version with persistent storage and semantic retrieval, download or fork Koala from
                   <a href={PROJECT_GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a> and deploy it yourself.
+                  This demo uses lightweight retrieval (BM25 only).
                 </p>
               </article>
             {/if}

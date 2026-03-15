@@ -49,7 +49,7 @@ Current implementation status:
 
 ## Quickstart
 
-Recommended Python version: 3.11 (see `.python-version`).
+Recommended Python version: 3.12 (see `.python-version`).
 
 ```bash
 python3 -m venv .venv
@@ -113,6 +113,32 @@ Run the full stack with Docker:
 ```bash
 cp .env.example .env
 docker compose up --build
+```
+
+## Demo mode (serverless-friendly)
+
+The public demo runs in **demo mode**:
+
+- Catalog entries are stored in the browser only (cleared when site data is removed).
+- Local assistants (Ollama) are disabled; hosted providers require your API key.
+- Retrieval runs in **lightweight mode (BM25 only)** to keep the serverless bundle size small.
+
+To enable demo mode in a deployment, set:
+
+```bash
+PUBLIC_DEMO_MODE=1
+```
+
+For the **full local deployment** with semantic retrieval and reranking, install the full dependency set:
+
+```bash
+pip install .[full]
+```
+
+Or keep using the existing full dependency file:
+
+```bash
+pip install -r requirements.txt
 ```
 
 ## Project layout
