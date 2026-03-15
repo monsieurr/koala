@@ -60,6 +60,116 @@
       description: 'GPAI obligations and model-level transparency requirements where applicable.'
     }
   ];
+
+  const demoConversations = [
+    {
+      id: 'facial-entry',
+      title: 'Office entry facial recognition',
+      subtitle: 'High-risk assessment',
+      role: 'Deployer',
+      system: 'Office entry facial recognition',
+      question: 'What does high-risk classification mean for my system?',
+      answer:
+        'High-risk systems are listed in Annex III and require risk management, data governance, technical documentation, and human oversight. As a Deployer, you must ensure compliance measures are implemented and documented. [1]',
+      sources: 'Annex III, Articles 9–17, Article 29.'
+    },
+    {
+      id: 'candidate-screening',
+      title: 'Candidate screening AI',
+      subtitle: 'Documentation obligations',
+      role: 'Provider',
+      system: 'Candidate screening classifier',
+      question: 'What documentation obligations apply to a hiring system?',
+      answer:
+        'Hiring systems are likely high-risk. Providers must maintain technical documentation, risk management files, and clear instructions for deployers. Conformity assessments and post-market monitoring are also required. [1]',
+      sources: 'Annex III, Articles 9–17, Article 61.'
+    },
+    {
+      id: 'support-chatbot',
+      title: 'Customer support chatbot',
+      subtitle: 'Transparency requirements',
+      role: 'Deployer',
+      system: 'Customer support chatbot',
+      question: 'What transparency obligations apply to a customer support chatbot?',
+      answer:
+        'Deployers must inform users that they are interacting with an AI system and provide accessible guidance on escalation to a human agent when needed. [1]',
+      sources: 'Article 50.'
+    }
+  ];
+
+  const suggestedQuestions = demoConversations.map((item) => item.question);
+
+  let activeDemoId = demoConversations[0].id;
+  let demoInput = demoConversations[0].question;
+  let demoQuestion = demoConversations[0].question;
+  let demoAnswer = demoConversations[0].answer;
+  let demoSources = demoConversations[0].sources;
+  let demoRole = demoConversations[0].role;
+  let demoSystem = demoConversations[0].system;
+  let demoCopied = false;
+  let copyTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  const fallbackAnswer =
+    'This is a simulated response. Run Koala locally for grounded answers, citations, and full analysis workflows.';
+
+  const fallbackSources = 'Simulated demo response.';
+
+  function applyDemo(item: (typeof demoConversations)[number]) {
+    demoQuestion = item.question;
+    demoAnswer = item.answer;
+    demoSources = item.sources;
+    demoRole = item.role;
+    demoSystem = item.system;
+  }
+
+  function selectDemo(item: (typeof demoConversations)[number]) {
+    activeDemoId = item.id;
+    demoInput = item.question;
+    applyDemo(item);
+  }
+
+  function handleAsk() {
+    const trimmed = demoInput.trim();
+    if (!trimmed) {
+      return;
+    }
+    const match = demoConversations.find(
+      (item) => item.question.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (match) {
+      selectDemo(match);
+      return;
+    }
+    demoQuestion = trimmed;
+    demoAnswer = fallbackAnswer;
+    demoSources = fallbackSources;
+  }
+
+  async function handleCopy() {
+    const text = demoAnswer;
+    if (!text) {
+      return;
+    }
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        // ignore copy errors for demo
+      }
+    }
+    demoCopied = true;
+    if (copyTimeout) {
+      clearTimeout(copyTimeout);
+    }
+    copyTimeout = setTimeout(() => {
+      demoCopied = false;
+    }, 1400);
+  }
+
+  function pickSuggestion(question: string) {
+    demoInput = question;
+    handleAsk();
+  }
 </script>
 
 <main class="page">
@@ -134,25 +244,24 @@
       <h2>Placeholder demo</h2>
       <p>A realistic walkthrough of the interface, without a live backend.</p>
     </div>
-    <div class="demo-shell" aria-hidden="true">
+    <div class="demo-shell">
       <aside class="demo-panel demo-history">
         <div class="panel-header">
           <span>History</span>
           <span class="pill">3</span>
         </div>
         <div class="demo-list">
-          <div class="demo-item active">
-            <p>Office entry facial recognition</p>
-            <span>High-risk assessment</span>
-          </div>
-          <div class="demo-item">
-            <p>Candidate screening AI</p>
-            <span>Documentation obligations</span>
-          </div>
-          <div class="demo-item">
-            <p>Customer support chatbot</p>
-            <span>Transparency requirements</span>
-          </div>
+          {#each demoConversations as item}
+            <button
+              class={`demo-item ${item.id === activeDemoId ? 'active' : ''}`}
+              type="button"
+              on:click={() => selectDemo(item)}
+              aria-pressed={item.id === activeDemoId}
+            >
+              <p>{item.title}</p>
+              <span>{item.subtitle}</span>
+            </button>
+          {/each}
         </div>
       </aside>
 
@@ -161,19 +270,29 @@
           <span>Chat</span>
           <span class="badge badge-outline">Simulated</span>
         </div>
-        <div class="chat-bubble user">What does high-risk classification mean for my system?</div>
+        <div class="chat-bubble user">{demoQuestion}</div>
         <div class="chat-bubble assistant">
-          High-risk systems are listed in Annex III and require risk management, data governance, technical
-          documentation, and human oversight. As a Deployer, you must ensure compliance measures are implemented and
-          documented. [1]
-          <button class="copy" type="button">Copy answer</button>
+          {demoAnswer}
+          <button class="copy" type="button" on:click={handleCopy}>
+            {demoCopied ? 'Copied' : 'Copy answer'}
+          </button>
         </div>
         <div class="chat-bubble assistant note">
-          Sources cited: Annex III, Articles 9–17, Article 29.
+          Sources cited: {demoSources}
+        </div>
+        <div class="suggested">
+          {#each suggestedQuestions as question}
+            <button type="button" on:click={() => pickSuggestion(question)}>{question}</button>
+          {/each}
         </div>
         <div class="chat-input">
-          <span>Ask a compliance question…</span>
-          <button type="button">Ask</button>
+          <input
+            type="text"
+            bind:value={demoInput}
+            placeholder="Ask a compliance question…"
+            aria-label="Ask a compliance question"
+          />
+          <button type="button" on:click={handleAsk}>Ask</button>
         </div>
       </section>
 
@@ -184,11 +303,11 @@
         </div>
         <div class="context-row">
           <span>You are reviewing as</span>
-          <strong>Deployer</strong>
+          <strong>{demoRole}</strong>
         </div>
         <div class="context-row">
           <span>System focus</span>
-          <strong>Office entry facial recognition</strong>
+          <strong>{demoSystem}</strong>
         </div>
         <div class="context-row">
           <span>Sources</span>
@@ -473,11 +592,20 @@
     border-radius: 12px;
     background: #f7efe7;
     border: 1px solid transparent;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    font: inherit;
   }
 
   .demo-item.active {
     border-color: #c8b6a6;
     background: #fff;
+  }
+
+  .demo-item:focus-visible {
+    outline: 2px solid #6a4a32;
+    outline-offset: 2px;
   }
 
   .demo-item p {
@@ -528,7 +656,27 @@
     padding: 6px 10px;
     border-radius: 10px;
     font-size: 12px;
-    cursor: default;
+    cursor: pointer;
+  }
+
+  .suggested {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .suggested button {
+    background: #f7efe7;
+    border: 1px solid #e0d0c1;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .suggested button:focus-visible {
+    outline: 2px solid #6a4a32;
+    outline-offset: 2px;
   }
 
   .chat-input {
@@ -540,6 +688,19 @@
     padding: 10px 12px;
     color: #8b7a6b;
     background: #fffaf5;
+    gap: 12px;
+  }
+
+  .chat-input input {
+    border: none;
+    background: transparent;
+    font: inherit;
+    flex: 1;
+    color: #2f241b;
+  }
+
+  .chat-input input:focus {
+    outline: none;
   }
 
   .chat-input button {
@@ -549,6 +710,7 @@
     border-radius: 10px;
     padding: 6px 10px;
     font-size: 12px;
+    cursor: pointer;
   }
 
   .context-row {
