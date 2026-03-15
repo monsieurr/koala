@@ -1,0 +1,16 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+*.pyc
+*.log
+
+frontend/node_modules/
+frontend/.svelte-kit/
+frontend/build/
+
+data/chroma/*
+!data/chroma/.gitkeep
+
+data/pdfs/*
+!data/pdfs/.gitkeep
