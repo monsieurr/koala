@@ -63,7 +63,7 @@ Run the backend locally:
 uvicorn api.main:app --reload
 ```
 
-Run the frontend locally:
+Run the frontend locally (the full app is now served at `/app`, the root path is a static showcase page):
 
 ```bash
 cd frontend
@@ -108,7 +108,7 @@ curl -X POST http://localhost:8000/query \
   -d '{"question":"What are the transparency obligations for high-risk AI systems?"}'
 ```
 
-Run the full stack with Docker:
+Run the full stack with Docker (visit `http://localhost:3000/app` for the full app UI):
 
 ```bash
 cp .env.example .env
