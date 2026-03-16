@@ -9,7 +9,7 @@ proposal is treated as an amendment to the AI Act, not a separate regime.
 
 ## What it does today
 
-- Ingests AI Act sources (including the Omnibus proposal) into a searchable index.
+- Supports ingesting AI Act sources into a searchable index (AI Act PDF included; Omnibus proposal must be supplied separately).
 - Answers questions with citations and falls back to extractive responses when models are unavailable.
 - Stores AI system entries and produces role-aware risk and obligation summaries.
 
@@ -66,6 +66,8 @@ python -m ingestion.pipeline ingest --pdf ./data/pdfs/OJ_L_202401689_EN_TXT.pdf 
 
 Ingest the Digital Omnibus on AI proposal:
 
+Download the proposal PDF and place it at `./data/pdfs/CELEX_52025PC0836_EN_TXT.pdf` (not bundled in the repo).
+
 ```bash
 python -m ingestion.pipeline ingest --pdf ./data/pdfs/CELEX_52025PC0836_EN_TXT.pdf --source "Digital Omnibus on AI (COM(2025) 836)"
 ```
@@ -75,7 +77,7 @@ Or ingest through the API:
 ```bash
 curl -X POST http://localhost:8000/ingest \
   -H "Content-Type: application/json" \
-  -d '{"pdf_path":"./data/pdfs/ai_act.pdf","source":"AI Act (EU 2024/1689)"}'
+  -d '{"pdf_path":"./data/pdfs/OJ_L_202401689_EN_TXT.pdf","source":"AI Act (EU 2024/1689)"}'
 ```
 
 ```bash
@@ -84,8 +86,8 @@ curl -X POST http://localhost:8000/ingest \
   -d '{"pdf_path":"./data/pdfs/CELEX_52025PC0836_EN_TXT.pdf","source":"Digital Omnibus on AI (COM(2025) 836)"}'
 ```
 
-Note: the Regime toggle auto-selects sources by name. Keep source labels recognizable (e.g., “AI Act (EU 2024/1689)” and
-“Digital Omnibus on AI (COM(2025) 836)”) so the presets can find them.
+Note: source filters and badges match source labels. Keep labels recognizable (e.g., “AI Act (EU 2024/1689)” and
+“Digital Omnibus on AI (COM(2025) 836)”) so the UI can surface them consistently.
 
 Query the API:
 
@@ -104,11 +106,11 @@ docker compose up --build
 
 ## Demo mode (serverless-friendly)
 
-The public demo runs in **demo mode**:
+The public demo at `/demo` is scripted and does not call the backend. If you want to host the full UI on a serverless platform, enable **demo mode**:
 
 - Catalog entries are stored in the browser only (cleared when site data is removed).
 - Local assistants (Ollama) are disabled; hosted providers require your API key.
-- Retrieval runs in **lightweight mode (BM25 only)** to keep the serverless bundle size small.
+- Retrieval runs in **lightweight mode (BM25 only)** when dense dependencies are not installed, to keep serverless bundles small.
 
 To enable demo mode in a deployment, set:
 
@@ -155,5 +157,6 @@ docker-compose.yml   Two-service local deployment
 - The parser is intentionally simple and article-oriented to preserve legal meaning.
 - Dense retrieval and reranking degrade gracefully when optional model dependencies are unavailable.
 - Answer generation degrades to an extractive fallback when LiteLLM is not installed or no provider is reachable.
-- Local backend runs default to `http://localhost:11434`.
+- Koala supports compliance analysis but does not provide legal advice.
+- Local Ollama runs at `http://localhost:11434` by default.
 - Docker overrides Ollama to `http://host.docker.internal:11434` via compose.
